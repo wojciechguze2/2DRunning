@@ -27,19 +27,23 @@ fps_clock = pygame.time.Clock()
 screen = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption('2d running')
 
-PLAYER_SPRITE_SIZE = 100
+SPRITE_SIZE = 100
+
+GROUND_Y = WINDOW_HEIGHT - WINDOW_PADDING * 4 - SPRITE_SIZE
 
 player_sprite = sprites.Player(
     x=WINDOW_PADDING * 2,
-    y=WINDOW_HEIGHT - WINDOW_PADDING * 2 - PLAYER_SPRITE_SIZE
+    y=GROUND_Y
 )
 
 player_group = pygame.sprite.Group(player_sprite)
-# opponents_group = pygame.sprite.Group()
+opponents_group = pygame.sprite.Group()
 
 pygame.display.update()
 
 main_loop_counter = 0
+opponent = None
+hit_times = 0
 
 
 def update_pygame_display(fps=75):
@@ -51,10 +55,8 @@ def update_sprite_groups():
     player_group.update()
     player_group.draw(screen)
 
-    """
     opponents_group.update()
     opponents_group.draw(screen)
-    """
 
 
 while True:
@@ -115,10 +117,29 @@ while True:
         player_sprite.jumping_starting_pos_y = None
         # print('end failing %d' % player_rect.y)
 
-    if key_pressed[pygame.K_SPACE] and player_sprite.rect.left:
-        facing = -1
-    elif key_pressed[pygame.K_SPACE] and not player_sprite.rect.left:
-        facing = 1
+    if not opponents_group.sprites():
+        if main_loop_counter / 100 - hit_times > 7:
+            opponent_speed = main_loop_counter / 100 - hit_times
+        else:
+            opponent_speed = 7
+
+        print('Opponent speed: %.2f' % opponent_speed)
+
+        opponent = sprites.Opponent(
+            x=WINDOW_WIDTH,
+            y=GROUND_Y,
+            speed=opponent_speed
+        )
+
+        opponents_group.add(opponent)
+
+    if opponent:
+        opponent.move()
+
+    if player_rect.colliderect(opponent.rect):
+        hit_times += 1
+        print('You got hit %d times' % hit_times)
+        opponent.kill()
 
     update_sprite_groups()
     update_pygame_display()
