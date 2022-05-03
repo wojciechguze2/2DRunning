@@ -1,3 +1,6 @@
+from random import randint
+
+from pygame import Surface
 from pygame.image import load
 from pygame.sprite import Sprite
 
@@ -15,7 +18,7 @@ class Player(Sprite):
         self.speed = 7
 
         self.jumping = False
-        self.failing = False
+        self.falling = False
 
         self.jumping_count = 0
 
@@ -52,3 +55,13 @@ class Opponent(Sprite):
         if self.rect.x <= 0:
             self.kill()
 
+
+class Platform(Sprite):
+    def __init__(self, x=0, y=0, resistance=0):
+        super().__init__()
+
+        self.image = Surface((randint(30, 200), randint(15, 30)))
+        self.image.fill((randint(0, 255), randint(0, 255), randint(0, 255)))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y if y else randint(400, 600)
